@@ -1,0 +1,18 @@
+# Connection Details
+name: "Movie"
+url: "jdbc:postgresql://localhost:5432/moviedb"
+userName: "moviedb"
+password: "moviedb"
+schemaName: "moviedb"
+
+# Mapping Logic
+rootPackage: "org.example"
+
+insertMap:
+  CREATED_DATE: CURRENT_TIMESTAMP
+  MODIFIED_DATE:
+  MODIFIED_BY:
+updateMap:
+  MODIFIED_DATE: CURRENT_TIMESTAMP
+  CREATED_DATE:
+  CREATED_BY:
