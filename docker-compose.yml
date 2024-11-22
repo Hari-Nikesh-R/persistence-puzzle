@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.8'
 
 # log reference : https://www.postgresql.org/docs/current/runtime-config-logging.html
 # https://postgresqlco.nf/doc/en/param/log_statement/
@@ -12,12 +12,10 @@ services:
         "-c", "log_line_prefix=",
         "-c", "log_statement=mod",
       ]
-    container_name: postgresdb
+    container_name: the_database
+    restart: always
     environment:
-      POSTGRES_DB: moviedb
-      POSTGRES_USER: moviedb
-      POSTGRES_PASSWORD: moviedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
     ports:
       - "5432:5432"
-    volumes:
-      - ${PWD}/init.db/postgres:/docker-entrypoint-initdb.d
