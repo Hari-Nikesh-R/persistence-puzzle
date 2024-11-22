@@ -40,24 +40,18 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.19.8</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Compiler -->
             <plugin>
-                <groupId>org.sqlcomponents</groupId>
-                <artifactId>maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generated-sources</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
                 <dependencies>
                     <dependency>
                         <groupId>org.postgresql</groupId>
@@ -65,9 +59,51 @@
                         <version>${postgresql.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
+                <!-- More shared defaults are defined in the parent pom.xml -->
+                <configuration>
+                    <jdbc>
+                        <url>jdbc:postgresql://localhost:5432/postgres</url>
+                        <user>postgres</user>
+                        <password>postgres123</password>
+                    </jdbc>
+                    <generator>
+                        <database>
+                            <includes>.*(person)</includes>
+                            <excludes>
+                                (?i:information_schema\..*)
+                                | (?i:pg_catalog\..*)
+                            </excludes>
+                            <inputSchema>public</inputSchema>
+                        </database>
+                        <generate>
+                            <pojosAsJavaRecordClasses>true</pojosAsJavaRecordClasses>
+                        </generate>
+                        <target>
+                            <!-- We're version controlling the source code for better documentation on github, etc.
+                                 This isn't necessary, though, see also:
+                                 https://www.jooq.org/doc/latest/manual/code-generation/codegen-version-control/ -->
+                            <directory>target/generated-sources/persistence</directory>
+                        </target>
+                    </generator>
+                </configuration>
 
+                <executions>
+                    <execution>
+                        <id>generate-demo-java</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>
+                                <target>
+                                    <packageName>com.example</packageName>
+                                </target>
+                            </generator>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
 </project>

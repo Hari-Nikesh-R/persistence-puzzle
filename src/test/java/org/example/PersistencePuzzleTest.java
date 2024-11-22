@@ -1,8 +1,12 @@
 package org.example;
 
 
-import org.example.model.Person;
+import com.example.tables.Person;
+import com.example.tables.records.PersonRecord;
 import org.example.store.PersistencePuzzle;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
@@ -18,15 +22,21 @@ import java.sql.SQLException;
  */
 class PersistencePuzzleTest {
 
-    @Test
-    void test() throws SQLException {
+    private final PersistencePuzzle persistencePuzzle;
+    PersistencePuzzleTest() {
+        persistencePuzzle = new PersistencePuzzle();
+    }
 
-        PersistencePuzzle persistencePuzzle = new PersistencePuzzle(getDataSource());
+    @Test
+    void test()  {
+        DSLContext context = DSL.using(getDataSource(), SQLDialect.POSTGRES);
+        PersonRecord person = context.newRecord(Person.PERSON);
+        person.setName("Name");
 
         // The Puzzle
-        Person person = persistencePuzzle.save(new Person(null, "Hello"));
+        PersonRecord personRecord = persistencePuzzle.save(person);
 
-        System.out.println(person);
+        System.out.println(personRecord);
 
     }
 
