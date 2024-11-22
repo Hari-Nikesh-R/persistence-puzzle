@@ -19,3 +19,5 @@ services:
       POSTGRES_PASSWORD: moviedb
     ports:
       - "5432:5432"
+    volumes:
+      - ${PWD}/init.db/postgres:/docker-entrypoint-initdb.d
