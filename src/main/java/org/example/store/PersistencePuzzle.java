@@ -20,7 +20,7 @@ import java.util.Optional;
  *
  *
  * 2. Use What I give in JAVA
- * 3. You use this in Only Spring Boot,  (Framework or library Dependent)
+ * 3. 3. You use this in Spring Boot, Quarkus or Anything. (Framework/Library Independent)
  */
 public class PersistencePuzzle {
 
