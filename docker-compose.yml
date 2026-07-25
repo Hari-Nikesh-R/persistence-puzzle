@@ -4,7 +4,7 @@ version: '3.8'
 # https://postgresqlco.nf/doc/en/param/log_statement/
 services:
   postgresdb:
-    image: postgres:11
+    image: postgres:latest
     command:
       [
         "postgres",
@@ -20,3 +20,5 @@ services:
     ## docker logs -f the_database
     ports:
       - "5432:5432"
+    volumes:
+      - ./init.db:/docker-entrypoint-initdb.d
