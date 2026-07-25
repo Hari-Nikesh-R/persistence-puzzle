@@ -1,66 +1,45 @@
 package org.example.store;
 
 import org.example.model.Person;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
 
-
-/**
- * 1. Only You, JDK and JDBC Driver (Postgres) + Little Etc + More Etc
- *
- *
- * 2. Use What I give in JAVA
- * 3. You use this in Only Spring Boot,  (Framework or library Dependent)
- */
 public class PersistencePuzzle {
 
     private static final String INSERT_SQL = "INSERT INTO person(name) VALUES (?)";
-    private static final String SELECT_SQL = "SELECT id,name from person where id=?";
+    private static final String SELECT_SQL = "SELECT id, name FROM person WHERE id = ?";
 
-    private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
 
     public PersistencePuzzle(final DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.jdbcClient = JdbcClient.create(dataSource);
+    }
+
+    public PersistencePuzzle(final JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
     }
 
     public Person save(Person person) throws SQLException {
-        // Insert and Get Generated Person Id
-        long generatedId = -1;
-        try (Connection connection = this.dataSource.getConnection();
-             PreparedStatement preparedStatement
-                     = connection
-                     .prepareStatement(INSERT_SQL,
-                             Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, person.name());
-            preparedStatement.execute();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if(resultSet.next()) {
-                generatedId = resultSet.getLong(1);
-            }
-        }
-        // Fetch Person from Generated Person Id
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcClient.sql(INSERT_SQL)
+                .param(1, person.name())
+                .update(keyHolder, "id");
+
+        Number generatedKey = keyHolder.getKey();
+        long generatedId = generatedKey != null ? generatedKey.longValue() : -1;
+
         return findById(generatedId).orElse(null);
     }
 
     Optional<Person> findById(Long id) throws SQLException {
-        Person person = null;
-        try (Connection connection = this.dataSource.getConnection();
-             PreparedStatement preparedStatement
-                     = connection
-                     .prepareStatement(SELECT_SQL)) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
-                person = new Person(resultSet.getLong(1),
-                        resultSet.getString(2));
-            }
-        }
-        return Optional.ofNullable(person);
+        return jdbcClient.sql(SELECT_SQL)
+                .param(1, id)
+                .query((rs, rowNum) -> new Person(rs.getLong("id"), rs.getString("name")))
+                .optional();
     }
 }
